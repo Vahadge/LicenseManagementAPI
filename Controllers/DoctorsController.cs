@@ -9,7 +9,6 @@ namespace LicenseManagementAPI.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-[Authorize(Roles = "Admin")]
 public class DoctorsController : ControllerBase
 {
     private readonly IDoctorService _service;
@@ -35,6 +34,8 @@ public class DoctorsController : ControllerBase
         return Ok(ApiResponse<IEnumerable<DoctorDto>>.Success(doctors));
     }
 
+
+    [Authorize(Roles = "Admin")]
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(ApiResponse<DoctorDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
@@ -44,6 +45,8 @@ public class DoctorsController : ControllerBase
         return Ok(ApiResponse<DoctorDto>.Success(doctor));
     }
 
+
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<DoctorDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
@@ -55,6 +58,8 @@ public class DoctorsController : ControllerBase
             ApiResponse<DoctorDto>.Success(doctor, "Doctor created successfully."));
     }
 
+
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(ApiResponse<DoctorDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
@@ -66,6 +71,8 @@ public class DoctorsController : ControllerBase
         return Ok(ApiResponse<DoctorDto>.Success(doctor, "Doctor updated successfully."));
     }
 
+
+    [Authorize(Roles = "Admin")]
     [HttpPatch("{id:int}/status")]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
@@ -76,6 +83,8 @@ public class DoctorsController : ControllerBase
         return Ok(ApiResponse<object>.Success(null, "Doctor status updated successfully."));
     }
 
+
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
