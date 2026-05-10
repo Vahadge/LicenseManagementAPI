@@ -1,178 +1,95 @@
-🩺 License Management System
-![.NET](https://img.shields.io/badge/.NET-8-blue)  
-![Next.js](https://img.shields.io/badge/Next.js-14-black)  
-![SQL Server](https://img.shields.io/badge/Database-SQL%20Server-red)  
-![Dapper](https://img.shields.io/badge/ORM-Dapper-lightgrey)  
-![Auth](https://img.shields.io/badge/Auth-JWT-green)
-A full-stack Doctor License Management platform built for a Medical SaaS use case.
-Admins can:
-Manage doctor records
-Track license expiry
-Control access via JWT authentication
-A background job automatically updates expired licenses daily.
+This is a solid, production-ready architecture. It hits that "sweet spot" between professional-grade structure and practical simplicity. To give it a more human touch—moving it from a technical spec to a narrative of *why* and *how* it was built—here is an updated version.
+
+I’ve also integrated the specific design rationale for the **BackgroundService**, explaining why it beats the alternatives for this use case.
+
 ---
-📸 Architecture Overview
-```
-                    ┌────────────────────────────┐
-                    │        Frontend            │
-                    │  Next.js 14 (App Router)  │
-                    │  Tailwind + TypeScript    │
-                    └────────────┬──────────────┘
-                                 │ HTTP (JWT)
-                                 ▼
-                    ┌────────────────────────────┐
-                    │        API Layer           │
-                    │ ASP.NET Core Web API (.NET 8)
-                    │ Controllers + Middleware  │
-                    └────────────┬──────────────┘
-                                 │
-                                 ▼
-                    ┌────────────────────────────┐
-                    │     Application Layer      │
-                    │ Services + DTOs + Interfaces
-                    │ Business Logic             │
-                    └────────────┬──────────────┘
-                                 │
-                                 ▼
-                    ┌────────────────────────────┐
-                    │   Infrastructure Layer     │
-                    │ Dapper Repositories        │
-                    │ SqlConnectionFactory       │
-                    │ Background Jobs            │
-                    └────────────┬──────────────┘
-                                 │
-                                 ▼
-                    ┌────────────────────────────┐
-                    │       SQL Server DB        │
-                    │ Tables + Stored Procedures │
-                    └────────────────────────────┘
-```
+
+## 🩺 The License Management System
+
+**A Medical SaaS Case Study**
+
+This isn't just a CRUD app; it’s a focused solution for the "forgotten" administrative side of healthcare. I built this to handle the lifecycle of medical licenses using a modern tech stack that prioritizes speed and reliability.
+
+### 🛠 The Tech Stack
+
+* **The Engine:** .NET 8 (ASP.NET Core) for a high-performance, type-safe backend.
+* **The Face:** Next.js 14 (App Router) with Tailwind CSS for a snappy, responsive admin dashboard.
+* **The Memory:** SQL Server managed via **Dapper**. I chose Dapper over EF Core here to keep the data access layer transparent and lightning-fast.
+* **The Guard:** JWT-based authentication to ensure sensitive medical records stay behind a locked door.
+
 ---
-🧰 Tech Stack
-Layer	Technology
-API	.NET 8, ASP.NET Core
-Data Access	Dapper
-Database	SQL Server
-Authentication	JWT
-Background Jobs	Hosted Services
-Frontend	Next.js 14
-Styling	Tailwind CSS
+
+### 🧠 Design Decisions: The "Why" Behind the "What"
+
+#### 1. Why BackgroundService for License Expiry?
+
+One of the core features is the automatic transition of license statuses. I chose to implement this using **`BackgroundService` (IHostedService)** rather than a manual trigger or a heavy external scheduler.
+
+* **The "Set and Forget" Factor:** By using a native .NET Hosted Service, the "Expiry Engine" lives inside the application process. It starts when the web server starts.
+* **Automated Integrity:** At midnight, the job wakes up, scans the database for doctors whose licenses expired today, and flips their status.
+* **Why not a Cron Job?** While a Linux Cron job or Azure Function is great, keeping it as a `BackgroundService` makes the entire system **self-contained**. You don't need to configure external infrastructure to ensure doctors are flagged on time.
+* **Efficiency:** It uses a scoped service provider to interact with the database, ensuring we don't leak memory or keep connections open longer than needed.
+
+#### 2. Architecture & Pattern
+
+I followed a **Clean Layered Architecture**. It’s organized enough that a new developer could find their way around in five minutes, but light enough that it doesn't feel like "over-engineering."
+
+* **Infrastructure Layer:** This is where Dapper lives. By using an `IDbConnectionFactory`, we make the code testable and ensure connections are always disposed of correctly.
+* **Soft Deletes:** We never actually "kill" data. Setting `IsDeleted = 1` keeps the audit trail alive, which is a non-negotiable in medical software.
+
 ---
-📁 Project Structure
-```
+
+### 📂 Project Roadmap
+
+```text
 LicenseManagement/
-├── LicenseManagementAPI/
-│   ├── Domain/
-│   ├── Application/
-│   ├── Infrastructure/
-│   ├── Controllers/
-│   └── Common/
-├── LicenseManagementClient/
-└── sqlScripts/
+├── LicenseManagementAPI/    # The Brain: Services, Dapper repos, & Background Jobs
+├── LicenseManagementClient/ # The UI: Next.js dashboard with protected routes
+└── sqlScripts/              # The Foundation: SPs and Seed data
+
 ```
+
 ---
-⚙️ Setup Guide
-1️⃣ Prerequisites
-.NET 8 SDK
-SQL Server (LocalDB or full instance)
-Node.js 18+
----
-2️⃣ Database Setup
-Run scripts in `/sqlScripts` in order.
-✔ Safe to re-run  
-✔ Creates tables, SPs, seed data
-Default admin user is auto-created:
-Username: admin  
-Password: Admin@123
----
-3️⃣ Run Backend
-```
+
+### 🚀 Getting it Running
+
+**1. The Database**
+Populate your SQL Server using the scripts in `/sqlScripts`. It’ll set up your tables and a default admin:
+
+* **User:** `admin` | **Pass:** `Admin@123`
+
+**2. The Backend**
+
+```bash
 cd LicenseManagementAPI
 dotnet run
-```
-API → http://localhost:5126
-Swagger → http://localhost:5126/swagger
----
-4️⃣ Run Frontend
-```
-cd LicenseManagementClient
-npm install
-npm run dev
-```
-App runs on:
-http://localhost:3000
----
-🔐 Authentication Flow
-```
-User → Login → API validates → JWT issued → Stored in cookie
-→ Sent in requests → API authorizes endpoints
-```
----
-📡 API Endpoints
-Auth
-POST /api/auth/login
-Doctors (Protected)
-GET /api/doctors
-GET /api/doctors/{id}
-GET /api/doctors/expired
-POST /api/doctors
-PUT /api/doctors/{id}
-PATCH /api/doctors/{id}/status
-DELETE /api/doctors/{id}
----
-🧠 Business Rules
-License Expiry
-Scenario	Result
-Past date	Expired
-Future date	Active
-Suspended by admin	Always Suspended
-Background Job
-Runs daily at midnight (UTC)
-Marks expired doctors automatically
-Uses JobLog to prevent duplicate execution
----
-🗑️ Soft Delete
-No hard deletes.
-IsDeleted = 1
----
-🏗️ Design Decisions
-✅ Applied
-Clean layered architecture
-Dependency injection (`IDbConnectionFactory`)
-Lightweight ORM (Dapper)
-Background processing
----
-⚖️ Trade-offs
-Decision	Reason
-Single project	Simpler setup
-DTO = DB shape	Avoid unnecessary mapping
-Status as string	Simpler with Dapper
-DataAnnotations	Faster validation setup
----
-⚡ Performance Considerations
-Uses connection pooling (ADO.NET)
-Short-lived DB connections
-Stored procedures for heavy queries
-Soft deletes reduce data loss risk
----
-▶️ Run Everything
-```
-# Backend
-cd LicenseManagementAPI && dotnet run
 
-# Frontend
-cd LicenseManagementClient && npm run dev
 ```
+
+*Swagger stays open at port 5126 for easy testing.*
+
+**3. The Frontend**
+
+```bash
+cd LicenseManagementClient
+npm install && npm run dev
+
+```
+
+*Head over to `localhost:3000` and you're in.*
+
 ---
-🚀 Future Improvements
-Add Redis caching
-Introduce FluentValidation
-Move to multi-project architecture
-Add role-based access control
-Dockerize services
+
+### ⚖️ Real-World Trade-offs
+
+* **DTOs vs. Entities:** To keep development velocity high, I kept the DTOs closely aligned with the database schema. In a massive enterprise app, we’d split these, but for a focused SaaS tool, this reduces "mapping fatigue."
+* **Stored Procedures:** I used SPs for the heavier queries. It keeps the SQL logic out of the C# code and allows for performance tuning without redeploying the API.
+
+### 🔮 What’s Next?
+
+If this were to scale to thousands of clinics, the next steps would be adding **Redis** for caching doctor profiles and moving to a **Multi-project Solution** to strictly enforce layer boundaries.
+
 ---
-👨‍💻 Author Notes
-This project focuses on:
-Real-world SaaS architecture
-Clean backend design
-Practical trade-offs (not over-engineering)
+
+**Author's Note:**
+*This project was built to demonstrate how to handle stateful business logic (like license expiration) in a stateless API environment. It’s about making the technology serve the business rules, not the other way around.*
