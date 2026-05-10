@@ -48,7 +48,7 @@ LicenseManagement/
 ### 🚀 Getting it Running
 
 **1. The Database**
-Populate Our SQL Server using the scripts in `/sqlScripts`. It’ll set up Our tables and a default admin:
+Populate Our SQL Server using the scripts in `dbSchema`. It’ll set up Our tables
 
 * **User:** `admin` | **Pass:** `Admin@123`
 
