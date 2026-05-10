@@ -1,9 +1,3 @@
-This is a solid, production-ready architecture. It hits that "sweet spot" between professional-grade structure and practical simplicity. To give it a more human touch—moving it from a technical spec to a narrative of *why* and *how* it was built—here is an updated version.
-
-I’ve also integrated the specific design rationale for the **BackgroundService**, explaining why it beats the alternatives for this use case.
-
----
-
 ## 🩺 The License Management System
 
 **A Medical SaaS Case Study**
@@ -27,7 +21,7 @@ One of the core features is the automatic transition of license statuses. I chos
 
 * **The "Set and Forget" Factor:** By using a native .NET Hosted Service, the "Expiry Engine" lives inside the application process. It starts when the web server starts.
 * **Automated Integrity:** At midnight, the job wakes up, scans the database for doctors whose licenses expired today, and flips their status.
-* **Why not a Cron Job?** While a Linux Cron job or Azure Function is great, keeping it as a `BackgroundService` makes the entire system **self-contained**. You don't need to configure external infrastructure to ensure doctors are flagged on time.
+* **Why not a Cron Job?** While a Linux Cron job or Azure Function is great, keeping it as a `BackgroundService` makes the entire system **self-contained**. We don't need to configure external infrastructure to ensure doctors are flagged on time.
 * **Efficiency:** It uses a scoped service provider to interact with the database, ensuring we don't leak memory or keep connections open longer than needed.
 
 #### 2. Architecture & Pattern
@@ -54,7 +48,7 @@ LicenseManagement/
 ### 🚀 Getting it Running
 
 **1. The Database**
-Populate your SQL Server using the scripts in `/sqlScripts`. It’ll set up your tables and a default admin:
+Populate Our SQL Server using the scripts in `/sqlScripts`. It’ll set up Our tables and a default admin:
 
 * **User:** `admin` | **Pass:** `Admin@123`
 
@@ -76,9 +70,13 @@ npm install && npm run dev
 
 ```
 
-*Head over to `localhost:3000` and you're in.*
+*Head over to `localhost:3000` and We're in.*
 
 ---
+
+### 🔮 Decisions taken to avoid complexity
+
+Due to the demonstration purpose, I have followed Database first approach, where I have first created the required database schema and asked stored procedures. for this purpose I kept the usage of Sql Queries being hardcoded for all business logics since Entity framework was not recommended in the assessment. 
 
 ### ⚖️ Real-World Trade-offs
 
