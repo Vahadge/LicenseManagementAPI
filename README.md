@@ -1,13 +1,13 @@
 ## 🩺 The License Management System
 
-**A Medical SaaS Case Study**
+**A Medical SaaS**
 
-This isn't just a CRUD app; it’s a focused solution for the "forgotten" administrative side of healthcare. I built this to handle the lifecycle of medical licenses using a modern tech stack that prioritizes speed and reliability.
+it’s a focused solution for the "forgotten" administrative side of healthcare. I built this to handle the lifecycle of medical licenses using a modern tech stack that prioritizes speed and reliability.
 
 ### 🛠 The Tech Stack
 
 * **The Engine:** .NET 8 (ASP.NET Core) for a high-performance, type-safe backend.
-* **The Face:** Next.js 14 (App Router) with Tailwind CSS for a snappy, responsive admin dashboard.
+* **The Face:** Next.js ( Typescript )
 * **The Memory:** SQL Server managed via **Dapper**. I chose Dapper over EF Core here to keep the data access layer transparent and lightning-fast.
 * **The Guard:** JWT-based authentication to ensure sensitive medical records stay behind a locked door.
 
