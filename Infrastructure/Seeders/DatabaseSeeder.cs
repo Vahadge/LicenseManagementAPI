@@ -1,17 +1,18 @@
 using LicenseManagementAPI.Application.Interfaces;
-using LicenseManagementAPI.Common.Helpers;
 using LicenseManagementAPI.Domain.Entities;
 
 namespace LicenseManagementAPI.Infrastructure.Seeders;
 
 public class DatabaseSeeder
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IUserRepository  _userRepository;
+    private readonly IPasswordHasher  _passwordHasher;
     private readonly ILogger<DatabaseSeeder> _logger;
 
-    public DatabaseSeeder(IUserRepository userRepository, ILogger<DatabaseSeeder> logger)
+    public DatabaseSeeder(IUserRepository userRepository, IPasswordHasher passwordHasher, ILogger<DatabaseSeeder> logger)
     {
         _userRepository = userRepository;
+        _passwordHasher = passwordHasher;
         _logger         = logger;
     }
 
@@ -22,11 +23,10 @@ public class DatabaseSeeder
         var admin = new User
         {
             Username     = "admin",
-            PasswordHash = PasswordHelper.Hash("Admin@123"),
+            PasswordHash = _passwordHasher.Hash("Admin@123"),
             Role         = "Admin",
         };
 
         await _userRepository.CreateAsync(admin);
-        //_logger.LogInformation("Default admin user created. Username: admin  Password: Admin@123");
     }
 }

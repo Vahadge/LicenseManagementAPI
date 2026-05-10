@@ -1,5 +1,6 @@
 using LicenseManagementAPI.Application.DTOs;
 using LicenseManagementAPI.Application.Interfaces;
+using LicenseManagementAPI.Application.Mapping;
 using LicenseManagementAPI.Common.Exceptions;
 
 namespace LicenseManagementAPI.Application.Services;
@@ -15,7 +16,14 @@ public class DoctorService : IDoctorService
 
     public async Task<PagedResult<DoctorDto>> GetDoctorsAsync(DoctorListRequest request)
     {
-        return await _repository.GetDoctorsAsync(request);
+        var paged = await _repository.GetDoctorsAsync(request);
+        return new PagedResult<DoctorDto>
+        {
+            Data       = DoctorMapper.ToDtoList(paged.Data).ToList(),
+            TotalCount = paged.TotalCount,
+            PageNumber = paged.PageNumber,
+            PageSize   = paged.PageSize,
+        };
     }
 
     public async Task<DoctorDto> GetByIdAsync(int id)
@@ -23,7 +31,7 @@ public class DoctorService : IDoctorService
         var doctor = await _repository.GetByIdAsync(id);
         if (doctor is null)
             throw new NotFoundException($"Doctor with ID {id} was not found.");
-        return doctor;
+        return DoctorMapper.ToDto(doctor);
     }
 
     public async Task<DoctorDto> CreateAsync(CreateDoctorRequest request)
@@ -35,8 +43,9 @@ public class DoctorService : IDoctorService
             throw new ConflictException($"Email '{request.Email}' is already registered.");
 
         var id = await _repository.CreateAsync(request);
-        return await _repository.GetByIdAsync(id)
+        var doctor = await _repository.GetByIdAsync(id)
             ?? throw new InvalidOperationException("Failed to retrieve the created doctor.");
+        return DoctorMapper.ToDto(doctor);
     }
 
     public async Task<DoctorDto> UpdateAsync(int id, UpdateDoctorRequest request)
@@ -51,8 +60,9 @@ public class DoctorService : IDoctorService
             throw new ConflictException($"Email '{request.Email}' is already registered to another doctor.");
 
         await _repository.UpdateAsync(id, request);
-        return await _repository.GetByIdAsync(id)
+        var doctor = await _repository.GetByIdAsync(id)
             ?? throw new InvalidOperationException("Failed to retrieve the updated doctor.");
+        return DoctorMapper.ToDto(doctor);
     }
 
     public async Task UpdateStatusAsync(int id, UpdateStatusRequest request)
@@ -73,6 +83,7 @@ public class DoctorService : IDoctorService
 
     public async Task<IEnumerable<DoctorDto>> GetExpiredDoctorsAsync()
     {
-        return await _repository.GetExpiredDoctorsAsync();
+        var doctors = await _repository.GetExpiredDoctorsAsync();
+        return DoctorMapper.ToDtoList(doctors);
     }
 }

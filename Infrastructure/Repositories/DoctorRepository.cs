@@ -1,6 +1,7 @@
 using Dapper;
 using LicenseManagementAPI.Application.DTOs;
 using LicenseManagementAPI.Application.Interfaces;
+using LicenseManagementAPI.Domain.Entities;
 using LicenseManagementAPI.Domain.Enums;
 using System.Data;
 
@@ -12,7 +13,7 @@ public class DoctorRepository : IDoctorRepository
 
     public DoctorRepository(IDbConnectionFactory db) => _db = db;
 
-    public async Task<PagedResult<DoctorDto>> GetDoctorsAsync(DoctorListRequest request)
+    public async Task<PagedResult<Doctor>> GetDoctorsAsync(DoctorListRequest request)
     {
         using var conn = _db.Create();
 
@@ -25,19 +26,19 @@ public class DoctorRepository : IDoctorRepository
         using var multi = await conn.QueryMultipleAsync(
             "sp_GetDoctors", parameters, commandType: CommandType.StoredProcedure);
 
-        var doctors = (await multi.ReadAsync<DoctorDto>()).ToList();
+        var doctors = (await multi.ReadAsync<Doctor>()).ToList();
         var totalCount = await multi.ReadSingleAsync<int>();
 
-        return new PagedResult<DoctorDto>
+        return new PagedResult<Doctor>
         {
-            Data = doctors,
+            Data       = doctors,
             TotalCount = totalCount,
             PageNumber = request.PageNumber,
-            PageSize = request.PageSize
+            PageSize   = request.PageSize
         };
     }
 
-    public async Task<DoctorDto?> GetByIdAsync(int id)
+    public async Task<Doctor?> GetByIdAsync(int id)
     {
         using var conn = _db.Create();
 
@@ -56,7 +57,7 @@ public class DoctorRepository : IDoctorRepository
             WHERE Id = @Id AND IsDeleted = 0
             """;
 
-        return await conn.QuerySingleOrDefaultAsync<DoctorDto>(sql, new { Id = id });
+        return await conn.QuerySingleOrDefaultAsync<Doctor>(sql, new { Id = id });
     }
 
     public async Task<int> CreateAsync(CreateDoctorRequest request)
@@ -80,8 +81,8 @@ public class DoctorRepository : IDoctorRepository
             request.Specialization,
             request.LicenseNumber,
             LicenseExpiryDate = request.LicenseExpiryDate.Date,
-            Status = status,
-            CreatedDate = DateTime.UtcNow
+            Status            = status,
+            CreatedDate       = DateTime.UtcNow
         });
     }
 
@@ -89,7 +90,7 @@ public class DoctorRepository : IDoctorRepository
     {
         using var conn = _db.Create();
 
-        const string sql = """
+        string sql = $"""
             UPDATE Doctors
             SET FullName          = @FullName,
                 Email             = @Email,
@@ -97,9 +98,9 @@ public class DoctorRepository : IDoctorRepository
                 LicenseNumber     = @LicenseNumber,
                 LicenseExpiryDate = @LicenseExpiryDate,
                 [Status]          = CASE
-                                        WHEN @Status = 'Suspended'                        THEN 'Suspended'
-                                        WHEN @LicenseExpiryDate < CAST(GETDATE() AS DATE) THEN 'Expired'
-                                        ELSE 'Active'
+                                        WHEN @Status = '{DoctorStatus.Suspended}'              THEN '{DoctorStatus.Suspended}'
+                                        WHEN @LicenseExpiryDate < CAST(GETDATE() AS DATE)      THEN '{DoctorStatus.Expired}'
+                                        ELSE '{DoctorStatus.Active}'
                                     END,
                 ModifiedDate      = @ModifiedDate
             WHERE Id = @Id AND IsDeleted = 0
@@ -112,9 +113,9 @@ public class DoctorRepository : IDoctorRepository
             request.Specialization,
             request.LicenseNumber,
             LicenseExpiryDate = request.LicenseExpiryDate.Date,
-            Status = request.Status,
-            ModifiedDate = DateTime.UtcNow,
-            Id = id
+            Status            = request.Status,
+            ModifiedDate      = DateTime.UtcNow,
+            Id                = id
         });
     }
 
@@ -167,11 +168,11 @@ public class DoctorRepository : IDoctorRepository
         return await conn.ExecuteScalarAsync<bool>(sql, new { Email = email, ExcludeId = excludeId });
     }
 
-    public async Task<IEnumerable<DoctorDto>> GetExpiredDoctorsAsync()
+    public async Task<IEnumerable<Doctor>> GetExpiredDoctorsAsync()
     {
         using var conn = _db.Create();
 
-        return await conn.QueryAsync<DoctorDto>(
+        return await conn.QueryAsync<Doctor>(
             "sp_GetExpiredDoctors", commandType: CommandType.StoredProcedure);
     }
 
@@ -179,12 +180,12 @@ public class DoctorRepository : IDoctorRepository
     {
         using var conn = _db.Create();
 
-        return await conn.ExecuteAsync("""
+        return await conn.ExecuteAsync($"""
             UPDATE Doctors
-            SET    [Status]     = 'Expired',
+            SET    [Status]     = '{DoctorStatus.Expired}',
                    ModifiedDate = @Now
             WHERE  IsDeleted         = 0
-              AND  [Status]          = 'Active'
+              AND  [Status]          = '{DoctorStatus.Active}'
               AND  LicenseExpiryDate < CAST(GETDATE() AS DATE)
             """, new { Now = DateTime.UtcNow });
     }

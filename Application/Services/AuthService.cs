@@ -1,6 +1,5 @@
 using LicenseManagementAPI.Application.DTOs;
 using LicenseManagementAPI.Application.Interfaces;
-using LicenseManagementAPI.Common.Helpers;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,18 +10,20 @@ namespace LicenseManagementAPI.Application.Services;
 public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
-    private readonly IConfiguration _configuration;
+    private readonly IPasswordHasher _passwordHasher;
+    private readonly IConfiguration  _configuration;
 
-    public AuthService(IUserRepository userRepository, IConfiguration configuration)
+    public AuthService(IUserRepository userRepository, IPasswordHasher passwordHasher, IConfiguration configuration)
     {
-        _userRepository = userRepository;
-        _configuration  = configuration;
+        _userRepository  = userRepository;
+        _passwordHasher  = passwordHasher;
+        _configuration   = configuration;
     }
 
     public async Task<LoginResponse?> LoginAsync(LoginRequest request)
     {
         var user = await _userRepository.GetByUsernameAsync(request.Username);
-        if (user is null || !PasswordHelper.Verify(request.Password, user.PasswordHash))
+        if (user is null || !_passwordHasher.Verify(request.Password, user.PasswordHash))
             return null;
 
         var jwtSettings = _configuration.GetSection("Jwt");
@@ -38,10 +39,10 @@ public class AuthService : IAuthService
 
         var expiry = DateTime.UtcNow.AddHours(int.Parse(jwtSettings["ExpiryHours"] ?? "8"));
         var token  = new JwtSecurityToken(
-            issuer:            jwtSettings["Issuer"],
-            audience:          jwtSettings["Audience"],
-            claims:            claims,
-            expires:           expiry,
+            issuer:             jwtSettings["Issuer"],
+            audience:           jwtSettings["Audience"],
+            claims:             claims,
+            expires:            expiry,
             signingCredentials: creds);
 
         return new LoginResponse

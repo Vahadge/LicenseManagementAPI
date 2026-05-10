@@ -1,10 +1,14 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using LicenseManagementAPI.Application.Interfaces;
 using LicenseManagementAPI.Application.Services;
+using LicenseManagementAPI.Application.Validators;
 using LicenseManagementAPI.Common.Middleware;
 using LicenseManagementAPI.Infrastructure.Data;
 using LicenseManagementAPI.Infrastructure.Jobs;
 using LicenseManagementAPI.Infrastructure.Repositories;
 using LicenseManagementAPI.Infrastructure.Seeders;
+using LicenseManagementAPI.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -18,8 +22,8 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "License Management API",
-        Version = "v1",
+        Title       = "License Management API",
+        Version     = "v1",
         Description = "Doctor License Management API for a Medical SaaS platform"
     });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -53,6 +57,10 @@ builder.Services.AddCors(options =>
     });
 });
 
+// ── FluentValidation ───────────────────────────────────────────────────────
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateDoctorRequestValidator>();
+
 // ── JWT authentication ─────────────────────────────────────────────────────
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -73,6 +81,7 @@ builder.Services.AddAuthorization();
 
 // ── Infrastructure ─────────────────────────────────────────────────────────
 builder.Services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 // ── Application services ───────────────────────────────────────────────────
 builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
