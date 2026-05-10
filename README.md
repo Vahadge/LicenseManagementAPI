@@ -48,9 +48,9 @@ LicenseManagement/
 ### 🚀 Getting it Running
 
 **1. The Database**
-Populate Our SQL Server using the scripts in `dbSchema`. It’ll set up Our tables
+Populate Our SQL Server using the scripts in `dbSchema`. It’ll set up Our tables and store procedures ( self-explainatory with names )
 
-* **User:** `admin` | **Pass:** `Admin@123`
+* **User:** `admin` | **Pass:** `Admin@123` will be seeded when API runs
 
 **2. The Backend**
 
