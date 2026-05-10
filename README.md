@@ -22,7 +22,6 @@ One of the core features is the automatic transition of license statuses. I chos
 * **The "Set and Forget" Factor:** By using a native .NET Hosted Service, the "Expiry Engine" lives inside the application process. It starts when the web server starts.
 * **Automated Integrity:** At midnight, the job wakes up, scans the database for doctors whose licenses expired today, and flips their status.
 * **Why not a Cron Job?** While a Linux Cron job or Azure Function is great, keeping it as a `BackgroundService` makes the entire system **self-contained**. We don't need to configure external infrastructure to ensure doctors are flagged on time.
-* **Efficiency:** It uses a scoped service provider to interact with the database, ensuring we don't leak memory or keep connections open longer than needed.
 
 #### 2. Architecture & Pattern
 
@@ -38,8 +37,8 @@ I followed a **Clean Layered Architecture**. It’s organized enough that a new 
 ```text
 LicenseManagement/
 ├── LicenseManagementAPI/    # The Brain: Services, Dapper repos, & Background Jobs
-├── LicenseManagementClient/ # The UI: Next.js dashboard with protected routes
-└── sqlScripts/              # The Foundation: SPs and Seed data
+├── LicenseManagementClient/ # The UI: Next.js ( Tailwind CSS )
+└── dbSchema/              # The Foundation: Tables && SPs 
 
 ```
 
