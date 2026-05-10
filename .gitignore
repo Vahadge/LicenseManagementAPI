@@ -361,3 +361,23 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# ── Project-specific additions ────────────────────────────────────────────────
+
+# VS Copilot AI index (large binary files, regenerated automatically)
+.vs/**/CopilotIndices/
+
+# Local appsettings overrides (may contain real connection strings / secrets)
+# appsettings.json is committed intentionally (holds the placeholder template).
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+
+# Rider IDE
+.idea/
+*.sln.iml
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini

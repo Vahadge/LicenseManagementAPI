@@ -14,4 +14,5 @@ public interface IDoctorRepository
     Task<bool> LicenseNumberExistsAsync(string licenseNumber, int? excludeId = null);
     Task<bool> EmailExistsAsync(string email, int? excludeId = null);
     Task<IEnumerable<DoctorDto>> GetExpiredDoctorsAsync();
+    Task<int> MarkExpiredAsync();
 }

@@ -10,5 +10,6 @@ public class Doctor
     public DateTime LicenseExpiryDate { get; set; }
     public string Status { get; set; } = string.Empty;
     public DateTime CreatedDate { get; set; }
+    public DateTime? ModifiedDate { get; set; }
     public bool IsDeleted { get; set; }
 }

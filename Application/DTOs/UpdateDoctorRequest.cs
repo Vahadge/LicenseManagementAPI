@@ -23,4 +23,8 @@ public class UpdateDoctorRequest
 
     [Required(ErrorMessage = "License expiry date is required.")]
     public DateTime LicenseExpiryDate { get; set; }
+
+    [Required(ErrorMessage = "Status is required.")]
+    [RegularExpression("^(Active|Suspended)$", ErrorMessage = "Status must be Active or Suspended.")]
+    public string Status { get; set; } = "Active";
 }

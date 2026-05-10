@@ -1,6 +1,7 @@
 using LicenseManagementAPI.Application.DTOs;
 using LicenseManagementAPI.Application.Interfaces;
 using LicenseManagementAPI.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LicenseManagementAPI.Controllers;
@@ -8,6 +9,7 @@ namespace LicenseManagementAPI.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
+[Authorize(Roles = "Admin")]
 public class DoctorsController : ControllerBase
 {
     private readonly IDoctorService _service;
